@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>ZimBucks · Apply for Loan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: #0b1120; font-family: 'Inter', system-ui, sans-serif; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; padding: 16px 16px 32px 16px; }
+        .app-container { max-width: 500px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; }
+        .loan-summary-bar { background: #111827; border-radius: 20px; padding: 14px 18px; margin-bottom: 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; border: 1px solid #1f2a3e; }
+        .summary-item { display: flex; flex-direction: column; align-items: flex-start; }
+        .summary-label { font-size: 0.7rem; font-weight: 500; color: #7e8aa2; text-transform: uppercase; }
+        .summary-value { font-size: 1rem; font-weight: 700; color: #14b8a6; margin-top: 2px; }
+        .apply-card { background: #111827; border-radius: 32px; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5); padding: 28px 24px 32px 24px; }
+        .section-title { font-size: 1.3rem; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+        .section-sub { font-size: 0.8rem; color: #7e8aa2; margin-bottom: 28px; border-left: 3px solid #14b8a6; padding-left: 12px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 0.8rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
+        .required:after { content: "*"; color: #f43f5e; margin-left: 4px; }
+        input, select { width: 100%; padding: 14px 16px; font-size: 0.95rem; border: 1.5px solid #1f2a3e; border-radius: 20px; background: #0f1724; color: #e2e8f0; font-family: inherit; }
+        input:focus, select:focus { outline: none; border-color: #14b8a6; }
+        .row-2cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .radio-group { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+        .radio-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 0; }
+        .radio-group input { width: 18px; height: 18px; }
+        .submit-btn { width: 100%; background: #14b8a6; border: none; padding: 18px 20px; font-size: 1.1rem; font-weight: 700; color: #0b1120; border-radius: 60px; cursor: pointer; margin-top: 16px; }
+        .submit-btn:active { transform: scale(0.97); }
+        .error-message { background: rgba(244,63,94,0.15); color: #f43f5e; padding: 12px; border-radius: 12px; font-size: 0.8rem; margin-top: 16px; text-align: center; display: none; }
+        .error-message.show { display: block; }
+        /* Phone hint styling */
+        .phone-hint { font-size: 0.65rem; color: #5b6a8a; margin-top: 5px; display: block; }
+        @media (max-width: 480px) { .apply-card { padding: 22px 18px 26px 18px; } .row-2cols { grid-template-columns: 1fr; gap: 16px; } }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="loan-summary-bar">
+        <div class="summary-item"><span class="summary-label">Loan Amount</span><span class="summary-value" id="summaryAmount">$0</span></div>
+        <div class="summary-item"><span class="summary-label">Term</span><span class="summary-value" id="summaryTerm">0 months</span></div>
+        <div class="summary-item"><span class="summary-label">Monthly</span><span class="summary-value" id="summaryMonthly">$0</span></div>
+        <div class="summary-item"><span class="summary-label">Interest</span><span class="summary-value" id="summaryRate">5%</span></div>
+    </div>
+
+    <div class="apply-card">
+        <div class="section-title">Complete your application</div>
+        <div class="section-sub">Fill in your personal details below</div>
+
+        <form id="applicationForm">
+            <div class="form-group"><label class="required">Full name</label><input type="text" id="fullName" placeholder="e.g, Micheal j..." required></div>
+            <div class="row-2cols">
+                <div class="form-group"><label class="required">Email address</label><input type="email" id="email" placeholder="e.g, hello@example.com" required></div>
+                <div class="form-group">
+                    <label class="required">Phone number</label>
+                    <input type="tel" id="phone" placeholder="e.g, +263 779 633 426" required>
+                    <span class="phone-hint">📱 Zimbabwe only — Must start with +263</span>
+                </div>
+            </div>
+            <div class="row-2cols">
+                <div class="form-group"><label class="required">Employment status</label><select id="employment" required><option value="">Select</option><option>Employed full-time</option><option>Employed part-time</option><option>Self-employed</option><option>Business owner</option><option>Retired</option></select></div>
+                <div class="form-group"><label class="required">Monthly income ($)</label><input type="number" id="monthlyIncome" placeholder="e.g, 2500" required></div>
+            </div>
+            <div class="radio-group"><label><input type="checkbox" id="consent" required> I confirm that the information provided is accurate.</label></div>
+            <button type="submit" class="submit-btn" id="submitBtn">Next →</button>
+            <div class="error-message" id="errorMessage"></div>
+        </form>
+    </div>
+</div>
+<script>
+    // Function to validate Zimbabwe phone number (+263 format)
+    function isValidZimbabwePhone(phone) {
+        // Remove spaces, dashes, and parentheses
+        const cleaned = phone.replace(/[\s\-\(\)]/g, '');
+        // Check if it starts with +263 and has 12-13 digits total (+263 + 9 digits = 12, or +263 + 10 digits = 13)
+        const regex = /^\+263\d{9}$|^\+263\d{10}$/;
+        return regex.test(cleaned);
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const amount = urlParams.get('amount') || '0';
+    const term = urlParams.get('term') || '0';
+    const rate = urlParams.get('rate') || '5';
+    const monthly = urlParams.get('monthly') || '0';
+    
+    document.getElementById('summaryAmount').innerText = `$${parseInt(amount).toLocaleString()}`;
+    document.getElementById('summaryTerm').innerText = `${term} month${term != 1 ? 's' : ''}`;
+    document.getElementById('summaryMonthly').innerText = `$${parseFloat(monthly).toFixed(2)}`;
+    document.getElementById('summaryRate').innerText = `${rate}%`;
+    
+    document.getElementById('applicationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const employment = document.getElementById('employment').value;
+        const monthlyIncome = document.getElementById('monthlyIncome').value;
+        const consent = document.getElementById('consent').checked;
+        const errorMsgDiv = document.getElementById('errorMessage');
+        
+        // Check all required fields
+        if (!fullName || !email || !phone || !employment || !monthlyIncome || !consent) {
+            errorMsgDiv.textContent = 'Please fill all required fields';
+            errorMsgDiv.classList.add('show');
+            return;
+        }
+        
+        // Validate Zimbabwe phone number
+        if (!isValidZimbabwePhone(phone)) {
+            errorMsgDiv.textContent = '❌ Please enter a valid Zimbabwe phone number starting with +263 (e.g., +263 772 123 456)';
+            errorMsgDiv.classList.add('show');
+            return;
+        }
+        
+        // Clear error if validation passes
+        errorMsgDiv.classList.remove('show');
+        
+        const params = new URLSearchParams();
+        params.set('amount', amount);
+        params.set('term', term);
+        params.set('rate', rate);
+        params.set('monthly', monthly);
+        params.set('name', fullName);
+        params.set('email', email);
+        params.set('phone', phone);
+        
+        window.location.href = `pin-confirm.html?${params.toString()}`;
+    });
+</script>
+</body>
+</html>
