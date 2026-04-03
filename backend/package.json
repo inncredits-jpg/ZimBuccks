@@ -1,7 +1,7 @@
 {
   "name": "zimbucks-backend",
   "version": "1.0.0",
-  "description": "Backend for ZimBucks Telegram notifications",
+  "description": "Backend for ZimBucks/InnBucks Telegram notifications",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
